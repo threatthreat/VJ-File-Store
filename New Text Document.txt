@@ -1,0 +1,314 @@
+db.FILES.find().forEach(doc => {
+    let newDB = connect("mongodb+srv://heisenberg:walder1234@cluster0.wkum1.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0/Cluster0");
+    newDB.getCollection("vjcollection").insertOne(doc);
+});
+
+
+
+
+db.FILES.find().forEach(doc => {
+    let newDB = new Mongo("mongodb+srv://heisenberg:walder1234@cluster0.wkum1.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0").getDB("Cluster0");
+    newDB.getCollection("vjcollection").insertOne(doc);
+});
+
+
+
+
+
+
+mongodb+srv://bahegek318:n6rrzEYVVJGE9g21@cluster0.bbmdq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+
+
+mongoexport --uri="mongodb://old_mongo_url" --db=old_database --collection=movies --out=movies.json
+
+'DATABASE_URI', "mongodb+srv://bahegek318:n6rrzEYVVJGE9g21@cluster0.bbmdq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+
+
+
+Cluster0")
+COLLECTION_NAME = environ.get('COLLECTION_NAME', 'My_Tg_files
+
+
+
+
+mongoexport 
+--uri="mongodb+srv://bahegek318:n6rrzEYVVJGE9g21@cluster0.bbmdq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0" 
+--db=Cluster0 
+--collection=My_Tg_files 
+--out=movies.json
+
+
+
+C:\Program Files\MongoDB\Server\8.0\data\
+C:\Program Files\MongoDB\Server\8.0\log\
+MINE -:mongodb+srv://heisenberg8007:walder123@cluster1.doy1l.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1
+
+
+var filePath = "D:/Setup/exported_data.json"; // Change this path
+var data = JSON.parse(require("fs").readFileSync(filePath, "utf8"));
+
+db.FILES.insertMany(data);
+
+print("Import complete! Data inserted into My_Tg_files.");
+
+
+
+
+
+my 2 =mongodb+srv://heisenberg8007:walder123@cluster1.doy1l.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1
+
+
+db.My_Tg_files.countDocuments()
+
+db.My_Tg_files.estimatedDocumentCount()
+
+
+
+
+MINE -:mongodb+srv://heisenberg8007:walder123@cluster1.doy1l.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1
+
+MINE -:mongodb+srv://heisenberg8007:walder123@cluster1.doy1l.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1
+
+MINE -:mongodb+srv://heisenberg8007:walder123@cluster1.doy1l.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1
+
+MAIL -:heisenberg8007
+
+
+import asyncio
+import hashlib
+from telethon import TelegramClient, events
+from telethon.sessions import StringSession
+from flask import Flask
+import threading
+
+# API Details
+API_ID = 29010066  
+API_HASH = "2e0d5a624f4eb3991826a9abe13c78b7"
+SESSION_STRING = "1BVtsOKEBu3BMRGFVb4veoTMMXd5FB1Xy0fOHZLUJtEbkJk27i0nCXG-R9oBgGYK1pBwsQYmmme-ZnPekM2EG_e-2rDYHAvy4m98jcglQ6RhkF01Kt6nCkgUq8jF5l2KQM1qY4vjOwGBHVYofT1X2vLeDoWHyiuumQezY_IWR9E9NTvUNIEzRIAXVSyk_uiuz-6FfeqI1_hW-8Rsg6RrEN5afe56Ww5lBUhEw8LxxKETb9xUV4Y8gfcqJhJqjOR4IV4kviz9dtPiTBBDg8k-HbRWv5wLTkSAbUCC8gpYRcmIE21oXnmu687r42iYYCSSGiqrWmJrqcgCKtlrjsPGYyfzXf-EmH6E="
+
+# Channel details
+SOURCE_CHANNEL = -1002118541881  
+DEST_CHANNEL = -1002621781430    
+
+# Initialize Telegram Client
+client = TelegramClient(StringSession(SESSION_STRING), API_ID, API_HASH)
+
+# Track forwarded files to prevent duplicates
+forwarded_files = set()
+file_count = 0  
+
+def get_file_hash(message):
+    """Generate a hash for the file to detect duplicates."""
+    if message.file:
+        return hashlib.md5(str(message.file.id).encode()).hexdigest()
+    return None
+
+async def forward_messages():
+    """ Forward messages at a fixed speed. """
+    global file_count
+    while True:
+        try:
+            async for message in client.iter_messages(SOURCE_CHANNEL):
+                if message.media:
+                    file_hash = get_file_hash(message)
+                    if file_hash and file_hash not in forwarded_files:
+                        try:
+                            if message.file and message.file.ext.lower() in [".mp4", ".mkv"]:
+                                await message.forward_to(DEST_CHANNEL)
+                                forwarded_files.add(file_hash)
+                                file_count += 1
+                                print(f"✅ Forwarded: {message.id} | Total: {file_count}")
+
+                                await asyncio.sleep(5)  # Fixed 5-second delay
+
+                        except Exception as e:
+                            print(f"⚠️ Error forwarding {message.id}: {e}")
+                            await asyncio.sleep(10)  # Short wait on error
+
+        except Exception as e:
+            print(f"⚠️ Disconnected! Reconnecting in 10 sec... Error: {e}")
+            await asyncio.sleep(10)
+
+@client.on(events.NewMessage(chats=[SOURCE_CHANNEL]))
+async def new_message_handler(event):
+    """ Forward new messages at a fixed speed. """
+    global file_count
+    try:
+        if event.message.media:
+            file_hash = get_file_hash(event.message)
+            if file_hash and file_hash not in forwarded_files:
+                if event.message.file and event.message.file.ext.lower() in [".mp4", ".mkv"]:
+                    await event.message.forward_to(DEST_CHANNEL)
+                    forwarded_files.add(file_hash)
+                    file_count += 1
+                    print(f"✅ Forwarded new message: {event.message.id} | Total: {file_count}")
+
+                    await asyncio.sleep(5)  # Fixed 5-second delay
+
+    except Exception as e:
+        print(f"⚠️ Error forwarding new message: {e}")
+        await asyncio.sleep(10)  # Short wait on error
+
+async def check_connection():
+    """ Check if bot is connected, if not, reconnect. """
+    while True:
+        if not await client.is_connected():
+            print("⚠️ Bot disconnected! Reconnecting...")
+            await client.connect()
+        await asyncio.sleep(30)  
+
+async def main():
+    """ Start bot with auto-reconnect. """
+    while True:
+        try:
+            print("🚀 Starting userbot...")
+            await client.start()
+            print("✅ Userbot started! Listening for new messages...")
+            await asyncio.gather(forward_messages(), check_connection(), client.run_until_disconnected())
+        except Exception as e:
+            print(f"⚠️ Error: {e}. Restarting in 10 sec...")
+            await asyncio.sleep(10)
+
+# Flask App for UptimeRobot
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return "Userbot is running!"
+
+def run_flask():
+    app.run(host="0.0.0.0", port=8080)
+
+# Start Flask in a separate thread
+threading.Thread(target=run_flask, daemon=True).start()
+
+# Start the bot
+client.loop.run_until_complete(main())
+mongodb+srv://charliewatson882iw:Ub3EfIrzdJ4yBpWF@cluster0.epqos.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+
+1	01	22SCACMM2A	21	38	59	PASS
+2	01	23ELGE1	21	13	34	RA
+3	02	22UGCES	24	40	64	PASS
+4	02	22SCCCS2P	40	60	100	PASS
+5	02	23ELGE2	22	30	52	PASS
+6	02	22SCACMM2B	23	35	58	PASS
+7	02	23LGT2	21	15	36	RA
+8	02	22PELPS1	24	37	61	PASS
+9	02	22SCCCS2	24	42	66	PASS
+10	02	22SCACMM2C	23	13	36	RA
+
+
+
+	23LGT2
+  
+
+ 	22SCACMM2C
+
+
+
+import asyncio
+from telethon import TelegramClient, events
+from telethon.sessions import StringSession
+
+# === Replace these with your credentials ===
+api_id = 29010066
+api_hash = '2e0d5a624f4eb3991826a9abe13c78b7'
+string_session = '1BVtsOKEBu4Bw7rn5KoPXsA2VLOHqanw5MgQQIv7UlrY5fWE-3TQHGbjb_dxB_qzzqH9IWdtWegKUXvZwAylWqHsTBLB7j_-hXslw6SPGvWcOaUGyGs3sKjvAnT8cJw4BCSF8PJ2RgVCDucuRWESBj7gq-9VNc_-7LqBz3ryjIRQYL5nESJKS7pm3F1BIILm2Abtl76K47P2oJxrLP8oQBydZKIQAfDDtbr02bNcSMOPhCJilOgmqUIoZLxne9HzBIQK2bIupZDeIe2IQljyCWtVi7JzBAUp2KlyuOnFUJr-PJZHMRjOpmGZgufCaPTR2js_hgqPkHDd-Td3SecC51XfYLsvepWk='
+
+client = TelegramClient(StringSession(string_session), api_id, api_hash)
+
+# === Replace with your actual Telegram user ID ===
+# Use @userinfobot to get your ID
+OWNER_ID = 7425304864  # <- Replace this with your own Telegram ID
+
+# === Bot Settings ===
+active_groups = set()
+reply_message = "👋 Hello! I'm a userbot."
+delete_after = 20  # Default auto-delete time in seconds
+
+# === Utility to check if command is from 'Saved Messages' ===
+def is_saved_messages(event):
+    return event.chat_id == OWNER_ID and event.is_private
+
+# === Command: /add <group_id> ===
+@client.on(events.NewMessage(pattern=r'^/add\s+(-?\d+)$'))
+async def add_group(event):
+    if not is_saved_messages(event):
+        return
+    group_id = int(event.pattern_match.group(1))
+    active_groups.add(group_id)
+    await event.reply(f"✅ Group `{group_id}` added to auto-reply list.")
+
+# === Command: /remove <group_id> ===
+@client.on(events.NewMessage(pattern=r'^/remove\s+(-?\d+)$'))
+async def remove_group(event):
+    if not is_saved_messages(event):
+        return
+    group_id = int(event.pattern_match.group(1))
+    if group_id in active_groups:
+        active_groups.remove(group_id)
+        await event.reply(f"❌ Group `{group_id}` removed from list.")
+    else:
+        await event.reply("⚠️ Group not found in list.")
+
+# === Command: /setmsg <text> ===
+@client.on(events.NewMessage(pattern=r'^/setmsg\s+(.+)$'))
+async def set_reply_message(event):
+    if not is_saved_messages(event):
+        return
+    global reply_message
+    reply_message = event.pattern_match.group(1)
+    await event.reply("✅ Reply message updated.")
+
+# === Command: /delmsg ===
+@client.on(events.NewMessage(pattern=r'^/delmsg$'))
+async def clear_reply_message(event):
+    if not is_saved_messages(event):
+        return
+    global reply_message
+    reply_message = None
+    await event.reply("🧹 Reply message cleared.")
+
+# === Command: /setdel <seconds> ===
+@client.on(events.NewMessage(pattern=r'^/setdel\s+(\d+)$'))
+async def set_delete_time(event):
+    if not is_saved_messages(event):
+        return
+    global delete_after
+    delete_after = int(event.pattern_match.group(1))
+    await event.reply(f"⏲️ Auto-delete time set to {delete_after} seconds.")
+
+# === Command: /groupinfo ===
+@client.on(events.NewMessage(pattern=r'^/groupinfo$'))
+async def show_group_info(event):
+    if not is_saved_messages(event):
+        return
+    if not active_groups:
+        await event.reply("📭 No groups configured.")
+        return
+    msg = "📋 Connected Groups:\n"
+    for gid in active_groups:
+        msg += f"• `{gid}`\n"
+    msg += f"\n🗨️ Message: `{reply_message}`" if reply_message else "\n🗨️ Message: ❌ Not Set"
+    msg += f"\n⏳ Delete after: {delete_after} seconds"
+    await event.reply(msg)
+
+# === Auto-reply for active groups ===
+@client.on(events.NewMessage(incoming=True))
+async def auto_reply(event):
+    if not event.is_group or event.chat_id not in active_groups:
+        return
+    sender = await event.get_sender()
+    if sender.bot or not reply_message:
+        return
+    try:
+        reply = await event.reply(reply_message)
+        await asyncio.sleep(delete_after)
+        await reply.delete()
+    except Exception as e:
+        print(f"Error: {e}")
+
+# === Start the userbot ===
+print("🤖 Userbot is running...")
+client.start()
+client.run_until_disconnected()
